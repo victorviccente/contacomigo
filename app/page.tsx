@@ -130,48 +130,57 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F7F9FC]">
-      {/* Sidebar Desktop */}
-      <div className={`fixed inset-0 z-50 lg:relative lg:block ${isSidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="absolute inset-0 bg-black/50 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={(tab) => { setActiveTab(tab); setIsSidebarOpen(false); }}
-          user={user}
-          avatarUrl={userProfile ? getAvatarUrl(userProfile.avatarId) : undefined}
-          username={userProfile?.username}
-        />
+    <div className="flex h-screen overflow-hidden bg-[#F7F9FC]">
+      {/* Sidebar - Mobile & Desktop */}
+      <div
+        className={`fixed inset-0 z-[60] lg:relative lg:inset-auto lg:z-0 lg:flex transition-all duration-300 ease-in-out ${isSidebarOpen ? 'bg-black/60 backdrop-blur-sm' : 'bg-transparent pointer-events-none lg:pointer-events-auto'
+          }`}
+        onClick={() => setIsSidebarOpen(false)}
+      >
+        <div
+          className={`h-full w-72 bg-white shadow-2xl lg:shadow-none transform transition-transform duration-300 ease-in-out pointer-events-auto ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+            }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={(tab) => { setActiveTab(tab); setIsSidebarOpen(false); }}
+            user={user}
+            avatarUrl={userProfile ? getAvatarUrl(userProfile.avatarId) : undefined}
+            username={userProfile?.username}
+          />
+        </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Top Header */}
-        <header className="h-20 bg-white border-b border-gray-100 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40">
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-4">
-            <button className="lg:hidden p-2 text-gray-500" onClick={() => setIsSidebarOpen(true)}>
+            <button className="lg:hidden p-2.5 text-gray-500 hover:bg-gray-100 rounded-xl transition-colors" onClick={() => setIsSidebarOpen(true)}>
               <Menu size={24} />
             </button>
-            <h2 className="text-lg lg:text-xl font-bold text-[#0B1320] truncate">{getTitle()}</h2>
+            <h2 className="text-lg lg:text-xl font-bold text-[#0B1320] tracking-tight truncate">{getTitle()}</h2>
           </div>
 
-          <div className="flex items-center gap-3 lg:gap-6">
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
             <div className="relative hidden xl:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
                 placeholder="Pesquisar..."
-                className="bg-gray-50 border-none rounded-xl pl-10 pr-4 py-2 text-sm w-48 focus:ring-2 focus:ring-[#1F7A8C]/20 outline-none transition-all"
+                className="bg-gray-50 border-transparent focus:bg-white border focus:border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm w-48 focus:ring-4 focus:ring-[#1F7A8C]/5 outline-none transition-all"
               />
             </div>
 
-            <button className="p-2 text-gray-400 hover:text-[#1F7A8C] transition-colors relative">
+            <button className="p-2.5 text-gray-400 hover:text-[#1F7A8C] hover:bg-gray-50 rounded-xl transition-all relative">
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#E63946] rounded-full border-2 border-white"></span>
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#E63946] rounded-full ring-2 ring-white"></span>
             </button>
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-[#1F7A8C] text-white p-2.5 lg:px-5 lg:py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-[#186170] transition-all shadow-lg shadow-[#1F7A8C]/10"
+              className="bg-[#1F7A8C] text-white p-2.5 lg:px-5 lg:py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-[#186170] transition-all shadow-lg shadow-[#1F7A8C]/20 hover:scale-[1.02] active:scale-95"
             >
               <Plus size={18} strokeWidth={3} />
               <span className="hidden sm:inline">Novo Registro</span>
@@ -181,39 +190,41 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all"
               >
-                <img
-                  src={userProfile ? getAvatarUrl(userProfile.avatarId) : ''}
-                  alt="Avatar"
-                  className="w-9 h-9 rounded-xl bg-gray-100"
-                />
+                <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-transparent group-hover:ring-[#1F7A8C]/20 transition-all">
+                  <img
+                    src={userProfile ? getAvatarUrl(userProfile.avatarId) : ''}
+                    alt="Avatar"
+                    className="w-full h-full object-cover bg-gray-50"
+                  />
+                </div>
               </button>
 
               {showUserMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
-                    <div className="p-4 border-b border-gray-100">
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="p-4 bg-gray-50/50 border-b border-gray-100">
                       <div className="flex items-center gap-3">
                         <img
                           src={userProfile ? getAvatarUrl(userProfile.avatarId) : ''}
                           alt="Avatar"
-                          className="w-12 h-12 rounded-xl bg-gray-100"
+                          className="w-12 h-12 rounded-xl bg-white shadow-sm border border-gray-100"
                         />
-                        <div>
-                          <p className="font-bold text-[#0B1320]">{user.name}</p>
-                          <p className="text-sm text-[#1F7A8C]">{userProfile?.username}</p>
+                        <div className="min-w-0">
+                          <p className="font-bold text-[#0B1320] truncate">{user.name}</p>
+                          <p className="text-sm text-[#1F7A8C] truncate">{userProfile?.username}</p>
                         </div>
                       </div>
                     </div>
                     <div className="p-2">
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-[#E63946] hover:bg-red-50 rounded-xl transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-3 py-3 text-[#E63946] hover:bg-red-50 rounded-xl transition-colors text-left"
                       >
                         <LogOut size={18} />
-                        <span className="font-medium">Sair da conta</span>
+                        <span className="font-bold text-sm">Sair da conta</span>
                       </button>
                     </div>
                   </div>
@@ -224,8 +235,8 @@ export default function Home() {
         </header>
 
         {/* View Content */}
-        <main className="flex-1 overflow-y-auto no-scrollbar">
-          <div className="max-w-7xl mx-auto p-4 lg:p-8">
+        <main className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
+          <div className="max-w-7xl mx-auto p-4 lg:p-10">
             {renderView()}
           </div>
         </main>

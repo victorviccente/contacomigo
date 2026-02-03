@@ -1,7 +1,7 @@
 'use client'
 
 import { AppTab, User } from '@/lib/types'
-import { Home, Target, BarChart2, Users, User as UserIcon, Sparkles, LayoutGrid } from 'lucide-react'
+import { Home, Target, BarChart2, Users, User as UserIcon, Sparkles, LayoutGrid, X } from 'lucide-react'
 
 interface SidebarProps {
   activeTab: AppTab
@@ -21,52 +21,58 @@ const NAVIGATION_ITEMS = [
 
 export default function Sidebar({ activeTab, setActiveTab, user, avatarUrl, username }: SidebarProps) {
   return (
-    <aside className="w-72 h-full bg-white border-r border-gray-100 flex flex-col z-50">
+    <aside className="w-full h-full bg-white flex flex-col relative">
       {/* Brand Logo */}
-      <div className="p-8 flex items-center gap-3">
-        <div className="w-10 h-10 bg-[#1F7A8C] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#1F7A8C]/20">
-          <LayoutGrid size={24} />
+      <div className="p-8 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#1F7A8C] to-[#186170] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#1F7A8C]/20">
+            <LayoutGrid size={22} />
+          </div>
+          <h1 className="text-xl font-bold tracking-tight text-[#0B1320]">ContaComigo</h1>
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-[#0B1320]">ContaComigo</h1>
       </div>
 
       {/* User Mini Profile */}
       {avatarUrl && (
-        <div className="px-4 mb-4">
-          <div className="flex items-center gap-3 p-3 bg-[#F7F9FC] rounded-2xl">
-            <img
-              src={avatarUrl}
-              alt="Avatar"
-              className="w-10 h-10 rounded-xl bg-white"
-            />
+        <div className="px-6 mb-8">
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-[24px] border border-gray-100/50">
+            <div className="relative">
+              <img
+                src={avatarUrl}
+                alt="Avatar"
+                className="w-12 h-12 rounded-2xl bg-white shadow-sm"
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#4CAF50] rounded-lg border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">
+                {user.level}
+              </div>
+            </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm text-[#0B1320] truncate">{user.name}</p>
-              <p className="text-xs text-[#1F7A8C] truncate">{username}</p>
+              <p className="text-xs text-[#1F7A8C] font-semibold truncate">@{username?.replace('@', '')}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 space-y-2">
+      <nav className="flex-1 px-4 space-y-1.5">
         {NAVIGATION_ITEMS.map(({ id, label, Icon }) => {
           const isActive = activeTab === id
           return (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-[#1F7A8C] text-white shadow-md shadow-[#1F7A8C]/20'
-                  : 'text-gray-500 hover:bg-gray-50'
-              }`}
+              className={`w-full flex items-center gap-4 px-5 py-4 rounded-[20px] transition-all duration-300 group ${isActive
+                ? 'bg-[#1F7A8C] text-white shadow-xl shadow-[#1F7A8C]/20 translate-x-1'
+                : 'text-gray-400 hover:text-[#0B1320] hover:bg-gray-50'
+                }`}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`font-semibold ${isActive ? 'text-white' : 'text-gray-600'}`}>
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+              <span className={`font-bold text-sm ${isActive ? 'text-white' : ''}`}>
                 {label}
               </span>
               {isActive && (
-                <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"></div>
               )}
             </button>
           )
@@ -74,25 +80,29 @@ export default function Sidebar({ activeTab, setActiveTab, user, avatarUrl, user
       </nav>
 
       {/* User Progress Footer */}
-      <div className="p-6 mt-auto border-t border-gray-50">
-        <div className="bg-[#F7F9FC] rounded-2xl p-4 space-y-3">
+      <div className="p-6 mt-auto border-t border-gray-50 bg-gray-50/30">
+        <div className="bg-white rounded-[24px] p-5 space-y-4 shadow-sm border border-gray-100">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Seu Nível</span>
-            <span className="text-xs font-bold text-[#F4C430] flex items-center gap-1">
-              <Sparkles size={12} fill="currentColor" /> LVL {user.level}
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nível Atual</span>
+            <span className="text-xs font-bold text-[#F4C430] bg-[#F4C430]/10 px-2 py-1 rounded-lg flex items-center gap-1.5">
+              <Sparkles size={12} fill="currentColor" /> {user.level}
             </span>
           </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#F4C430] transition-all duration-500"
-              style={{ width: `${(user.xp / user.xpToNextLevel) * 100}%` }}
-            ></div>
+          <div className="space-y-2">
+            <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#F4C430] to-[#FFD700] transition-all duration-1000 ease-out rounded-full shadow-[0_0_10px_rgba(244,196,48,0.3)]"
+                style={{ width: `${(user.xp / user.xpToNextLevel) * 100}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-bold">
+              <span className="text-gray-400">{user.xp} XP</span>
+              <span className="text-[#1F7A8C]">{user.xpToNextLevel} XP</span>
+            </div>
           </div>
-          <p className="text-[10px] text-gray-400 text-center font-medium">
-            {user.xp} / {user.xpToNextLevel} XP para subir
-          </p>
         </div>
       </div>
     </aside>
   )
 }
+

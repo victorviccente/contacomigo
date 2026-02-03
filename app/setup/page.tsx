@@ -60,187 +60,187 @@ export default function SetupPage() {
   const selectedAvatarData = AVATARS.find(a => a.id === selectedAvatar)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1e3a5f] to-[#1F7A8C] flex items-center justify-center p-3 sm:p-4">
-      {/* Background decorativo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-[#1F7A8C]/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-[#4CAF50]/10 rounded-full blur-3xl"></div>
+    <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-[#1F7A8C]/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute -bottom-[10%] -left-[10%] w-[50%] h-[50%] bg-[#4CAF50]/10 rounded-full blur-[120px]"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[#F4C430]/5 rounded-full blur-[150px]"></div>
       </div>
 
-      <div className="relative w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-4 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#1F7A8C] to-[#4CAF50] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 shadow-2xl shadow-[#1F7A8C]/30">
-            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+      <div className="relative w-full max-w-[700px] animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        {/* Header Section */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl mb-6 shadow-2xl shadow-[#1F7A8C]/10 border border-white">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#1F7A8C] to-[#186170] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#1F7A8C]/20">
+              <Sparkles className="w-7 h-7" />
+            </div>
           </div>
-          <h1 className="text-xl sm:text-3xl font-black text-white mb-1 sm:mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0B1320] tracking-tight mb-3">
             Bem-vindo ao ContaComigo!
           </h1>
-          <p className="text-[#94A3B8] text-sm sm:text-base px-4">
+          <p className="text-gray-500 font-medium px-4">
             {step === 'avatar'
-              ? 'Escolha seu personagem para a jornada'
-              : 'Agora escolha seu @ na plataforma'}
+              ? 'Escolha seu personagem para iniciar a jornada'
+              : 'Agora escolha como você será conhecido na comunidade'}
           </p>
         </div>
 
         {/* Progress indicator */}
-        <div className="flex items-center justify-center gap-2 mb-4 sm:mb-8">
-          <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${step === 'avatar' ? 'bg-[#4CAF50] scale-125' : 'bg-[#4CAF50]'}`}></div>
-          <div className={`w-6 sm:w-8 h-0.5 ${step === 'username' ? 'bg-[#4CAF50]' : 'bg-white/20'}`}></div>
-          <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${step === 'username' ? 'bg-[#4CAF50] scale-125' : 'bg-white/20'}`}></div>
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className={`h-2 transition-all duration-500 rounded-full ${step === 'avatar' ? 'w-12 bg-[#1F7A8C]' : 'w-4 bg-[#4CAF50]'}`}></div>
+          <div className={`h-2 transition-all duration-500 rounded-full ${step === 'username' ? 'w-12 bg-[#1F7A8C]' : 'w-4 bg-gray-200'}`}></div>
         </div>
 
-        {/* Card principal */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-[32px] p-4 sm:p-8 shadow-2xl border border-white/10 mx-1 sm:mx-0">
+        {/* Main Selection Card */}
+        <div className="bg-white rounded-[48px] p-6 sm:p-12 shadow-[0_32px_64px_-16px_rgba(31,122,140,0.12)] border border-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#1F7A8C]/5 to-transparent rounded-full -mr-16 -mt-16"></div>
 
-          {/* Step 1: Escolha de Avatar */}
-          {step === 'avatar' && (
-            <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-base sm:text-xl font-bold text-white text-center">
-                Qual personagem te representa?
-              </h2>
-
-              {/* Grid de Avatares - Responsivo */}
-              <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4">
-                {AVATARS.map((avatar) => (
-                  <button
-                    key={avatar.id}
-                    onClick={() => handleAvatarSelect(avatar.id)}
-                    className={`relative group flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl transition-all ${
-                      selectedAvatar === avatar.id
-                        ? 'bg-[#1F7A8C]/30 ring-2 ring-[#4CAF50] scale-105'
-                        : 'bg-white/5 hover:bg-white/10 active:scale-95 sm:hover:scale-105'
-                    }`}
-                  >
-                    {/* Avatar image */}
-                    <div className="relative">
-                      <img
-                        src={getAvatarUrl(avatar.id)}
-                        alt={avatar.name}
-                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-white/10"
-                      />
-                      {/* Check mark quando selecionado */}
-                      {selectedAvatar === avatar.id && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-[#4CAF50] rounded-full flex items-center justify-center shadow-lg">
-                          <Check size={12} className="text-white sm:hidden" strokeWidth={3} />
-                          <Check size={14} className="text-white hidden sm:block" strokeWidth={3} />
+          <div className="relative z-10">
+            {/* Step 1: Avatar Selection */}
+            {step === 'avatar' && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-4">
+                  {AVATARS.map((avatar) => {
+                    const isSelected = selectedAvatar === avatar.id
+                    return (
+                      <button
+                        key={avatar.id}
+                        onClick={() => handleAvatarSelect(avatar.id)}
+                        className={`relative group flex flex-col items-center gap-3 p-3 rounded-3xl transition-all duration-300 ${isSelected
+                            ? 'bg-[#1F7A8C] text-white shadow-xl shadow-[#1F7A8C]/30 -translate-y-1'
+                            : 'bg-gray-50 hover:bg-gray-100/80 text-gray-500 hover:text-[#0B1320]'
+                          }`}
+                      >
+                        <div className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-sm transition-transform duration-500 ${isSelected ? 'scale-105' : 'group-hover:scale-105'}`}>
+                          <img
+                            src={getAvatarUrl(avatar.id)}
+                            alt={avatar.name}
+                            className="w-full h-full object-cover bg-white"
+                          />
+                          {isSelected && (
+                            <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                              <div className="w-8 h-8 bg-white text-[#4CAF50] rounded-full flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-300">
+                                <Check size={20} strokeWidth={4} />
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider truncate w-full text-center">
+                          {avatar.name}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {selectedAvatar && (
+                  <div className="flex items-center justify-center gap-6 p-6 bg-gray-50/50 rounded-[32px] border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <img
+                      src={getAvatarUrl(selectedAvatar)}
+                      alt="Selected"
+                      className="w-20 h-20 rounded-2xl shadow-xl shadow-[#1F7A8C]/10 border-4 border-white"
+                    />
+                    <div className="space-y-1">
+                      <p className="text-xl font-black text-[#0B1320]">{selectedAvatarData?.name}</p>
+                      <p className="text-[#4CAF50] text-sm font-bold flex items-center gap-2">
+                        <Check size={16} strokeWidth={3} />
+                        Personagem pronto para aventura
+                      </p>
                     </div>
-                    {/* Nome do avatar */}
-                    <span className={`text-[10px] sm:text-xs font-medium truncate max-w-full ${
-                      selectedAvatar === avatar.id ? 'text-white' : 'text-[#94A3B8]'
-                    }`}>
-                      {avatar.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Preview do avatar selecionado */}
-              {selectedAvatar && (
-                <div className="flex items-center justify-center gap-3 sm:gap-4 pt-3 sm:pt-4 border-t border-white/10">
-                  <img
-                    src={getAvatarUrl(selectedAvatar)}
-                    alt="Avatar selecionado"
-                    className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-white/10 shadow-xl"
-                  />
-                  <div>
-                    <p className="text-white font-bold text-sm sm:text-base">{selectedAvatarData?.name}</p>
-                    <p className="text-[#4CAF50] text-xs sm:text-sm">Personagem selecionado</p>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 2: Escolha de Username */}
-          {step === 'username' && (
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-center justify-center gap-4 mb-4 sm:mb-6">
-                <img
-                  src={getAvatarUrl(selectedAvatar)}
-                  alt="Seu avatar"
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-white/10 shadow-xl"
-                />
-              </div>
-
-              <h2 className="text-base sm:text-xl font-bold text-white text-center">
-                Como você quer ser chamado?
-              </h2>
-
-              <div className="space-y-2">
-                <label className="text-[10px] sm:text-xs font-bold text-[#94A3B8] uppercase tracking-wide">
-                  Seu @ na plataforma
-                </label>
-                <div className="relative">
-                  <AtSign className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={18} />
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => {
-                      const value = e.target.value.replace('@', '')
-                      setUsername(value)
-                      if (value) validateUsername(value)
-                    }}
-                    placeholder="seunome"
-                    maxLength={20}
-                    className="w-full bg-white/10 border border-white/10 rounded-xl pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-white placeholder-[#94A3B8]/50 focus:ring-2 focus:ring-[#1F7A8C] focus:border-transparent outline-none transition-all text-base sm:text-lg"
-                  />
-                </div>
-                {usernameError && (
-                  <p className="text-[#E63946] text-xs sm:text-sm">{usernameError}</p>
                 )}
-                <p className="text-[#94A3B8] text-[10px] sm:text-xs">
-                  Este será seu identificador único na comunidade
-                </p>
               </div>
+            )}
 
-              {/* Preview */}
-              {username && !usernameError && (
-                <div className="bg-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
-                  <img
-                    src={getAvatarUrl(selectedAvatar)}
-                    alt="Preview"
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white/10"
-                  />
-                  <div>
-                    <p className="text-white font-bold text-sm sm:text-base">@{username}</p>
-                    <p className="text-[#94A3B8] text-xs sm:text-sm">Assim você aparecerá na comunidade</p>
+            {/* Step 2: Username Selection */}
+            {step === 'username' && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <img
+                      src={getAvatarUrl(selectedAvatar)}
+                      alt="Selected"
+                      className="w-24 h-24 rounded-3xl shadow-2xl shadow-[#1F7A8C]/20 border-4 border-white"
+                    />
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#4CAF50] text-white rounded-xl flex items-center justify-center shadow-lg">
+                      <Sparkles size={18} />
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* Botão voltar */}
-              <button
-                onClick={() => setStep('avatar')}
-                className="text-[#94A3B8] text-xs sm:text-sm hover:text-white transition-colors"
-              >
-                ← Voltar e trocar avatar
-              </button>
-            </div>
-          )}
+                <div className="space-y-6 max-w-sm mx-auto">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                      Seu @ único
+                    </label>
+                    <div className="relative group/input">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within/input:text-[#1F7A8C] transition-colors">
+                        <AtSign size={20} strokeWidth={2.5} />
+                      </div>
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => {
+                          const value = e.target.value.replace('@', '')
+                          setUsername(value)
+                          if (value) validateUsername(value)
+                        }}
+                        placeholder="seunome"
+                        maxLength={20}
+                        autoFocus
+                        className="w-full bg-gray-50/50 border-2 border-transparent focus:border-[#1F7A8C]/20 focus:bg-white rounded-2xl pl-12 pr-4 py-4 text-xl font-black text-[#0B1320] placeholder-gray-400 outline-none transition-all"
+                      />
+                    </div>
+                    {usernameError ? (
+                      <p className="text-[#E63946] text-xs font-bold pl-1">{usernameError}</p>
+                    ) : (
+                      <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider pl-1">
+                        Use letras, números e underline (_)
+                      </p>
+                    )}
+                  </div>
 
-          {/* Botão de continuar/finalizar */}
-          <button
-            onClick={handleContinue}
-            disabled={step === 'avatar' ? !selectedAvatar : !username || !!usernameError}
-            className="w-full mt-4 sm:mt-6 bg-gradient-to-r from-[#1F7A8C] to-[#4CAF50] text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-xl shadow-[#1F7A8C]/30 hover:shadow-2xl hover:shadow-[#1F7A8C]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
-          >
-            {step === 'avatar' ? (
-              <>
-                Continuar
-                <ArrowRight size={18} className="sm:hidden" />
-                <ArrowRight size={20} className="hidden sm:block" />
-              </>
-            ) : (
-              <>
-                Começar minha jornada
-                <Sparkles size={18} className="sm:hidden" />
-                <Sparkles size={20} className="hidden sm:block" />
-              </>
+                  {username && !usernameError && (
+                    <div className="bg-[#1F7A8C]/5 rounded-2xl p-4 flex items-center gap-4 border border-[#1F7A8C]/10 animate-in zoom-in-95 duration-300">
+                      <div className="w-10 h-10 bg-[#1F7A8C] text-white rounded-xl flex items-center justify-center font-bold">@</div>
+                      <div>
+                        <p className="text-sm font-black text-[#0B1320]">@{username}</p>
+                        <p className="text-[10px] font-bold text-[#1F7A8C] uppercase">Disponível para cadastro</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => setStep('avatar')}
+                    className="w-full text-center text-gray-400 font-bold text-xs uppercase tracking-widest hover:text-[#0B1320] transition-colors pt-2"
+                  >
+                    ← Trocar personagem
+                  </button>
+                </div>
+              </div>
             )}
-          </button>
+
+            {/* Persistent Navigation Button */}
+            <button
+              onClick={handleContinue}
+              disabled={step === 'avatar' ? !selectedAvatar : !username || !!usernameError}
+              className="w-full mt-10 bg-gradient-to-r from-[#1F7A8C] to-[#134D59] text-white py-4.5 rounded-[22px] font-black tracking-wide text-lg shadow-xl shadow-[#1F7A8C]/20 hover:shadow-2xl hover:shadow-[#1F7A8C]/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              {step === 'avatar' ? (
+                <>
+                  Continuar
+                  <ArrowRight size={22} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+                </>
+              ) : (
+                <>
+                  Começar Jornada
+                  <Sparkles size={22} />
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
