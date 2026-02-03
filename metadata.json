@@ -1,0 +1,8 @@
+
+{
+  "name": "ContaComigo SaaS - Gestão Financeira Gamificada",
+  "description": "Plataforma SaaS de controle financeiro gamificado que transforma hábitos saudáveis em conquistas através de trilhas de aprendizado e inteligência artificial.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
