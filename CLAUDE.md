@@ -36,8 +36,9 @@ Set `GEMINI_API_KEY` in `.env.local` for AI-powered financial tips feature.
   - `Providers.tsx` - Context providers wrapper (client component)
 - `lib/` - Shared utilities, types, and context
   - `auth-context.tsx` - Authentication state with localStorage persistence
-  - `types.ts` - TypeScript enums (AppTab) and interfaces (User, Mission, Badge, CommunityPost)
-  - `constants.ts` - Color scheme (COLORS), navigation items, mock data (MOCK_USER, MOCK_MISSIONS, MOCK_COMMUNITY)
+  - `data-context.tsx` - App data state (transactions, user, missions, progress) with localStorage persistence
+  - `types.ts` - TypeScript enums (AppTab) and interfaces (User, Mission, Badge, Transaction, UserProgress, AppSettings)
+  - `constants.ts` - Color scheme, navigation, badges, missions, XP config, leagues
 
 ## Authentication System
 
@@ -78,11 +79,22 @@ Password: 123456
 
 ## Gamification System
 
-- **XP/Levels**: Users earn XP completing missions, tracking expenses
-- **Streak**: Consecutive days of activity
-- **Badges**: Achievements with locked/unlocked states
-- **Missions**: Daily tasks and learning path modules
-- **League**: Ranking system (e.g., "BRONZE II")
+- **XP/Levels**: XP escalável (100 * level para próximo nível). +20 XP por transação, +30 XP missão diária, +100 XP missão trilha
+- **Streak**: Dias consecutivos de atividade. Reseta se pular um dia. Salva maior streak alcançado
+- **Badges**: 8 badges que desbloqueiam automaticamente (Primeiro Passo, 7 Dias, Poupador, Registrador, Focado, Mestre, Consistente, Economista)
+- **Missions**: 4 missões diárias (reset à meia-noite) + 5 missões de trilha (desbloqueio sequencial)
+- **League**: BRONZE III → DIAMANTE → MESTRE (baseado em XP total)
+
+**Data Context (`useData()` hook):**
+```tsx
+const {
+  transactions, user, missions, communityPosts, progress, settings,
+  addTransaction, deleteTransaction, addXP, updateUser,
+  completeMission, resetDailyMissions, addCommunityPost, likePost,
+  updateSettings, resetAllData,
+  isLoading, league, monthlyIncome, monthlyExpenses, weeklyExpenses
+} = useData()
+```
 
 ## Key Patterns
 
@@ -177,3 +189,90 @@ Components receive data and callbacks from parent:
 - Página de setup com grid responsivo (2 colunas mobile, 5 desktop)
 - Tamanhos de fonte, padding e elementos ajustados com prefixos `sm:`
 - Feedback visual em botões com `active:scale-[0.98]`
+
+### 2026-02-03 - Sistema de Transações e Gamificação Completo
+
+**Novo Sistema de Dados (`lib/data-context.tsx`):**
+- Criado contexto React para gerenciar todo o estado da aplicação
+- Persistência automática em localStorage para:
+  - `contacomigo_transactions` - Array de transações
+  - `contacomigo_user` - Dados do usuário (XP, level, streak, badges)
+  - `contacomigo_missions` - Status das missões
+  - `contacomigo_community` - Posts da comunidade
+  - `contacomigo_progress` - Estatísticas do usuário
+  - `contacomigo_settings` - Configurações do app
+
+**Sistema de Transações:**
+- Interface `Transaction` com: id, type (income/expense), amount, description, category, date, createdAt
+- Modal expandido com toggle Gasto/Ganho, seleção de categoria visual (grid de ícones), campo de data
+- Categorias de Gastos: Alimentação, Transporte, Lazer, Saúde, Educação, Moradia, Compras, Outros
+- Categorias de Ganhos: Salário, Freelance, Investimentos, Presente, Bônus, Outros
+- Cálculo automático de saldo, ganhos e gastos mensais
+
+**Sistema de Gamificação Funcional:**
+- **XP Escalável**: XP para próximo nível = 100 * level atual
+- **XP por Ação**:
+  - Registrar transação: +20 XP
+  - Completar missão diária: +30 XP
+  - Completar missão de trilha: +100 XP
+  - Manter streak: +10 XP/dia
+- **Missões Diárias com Reset**: Verificação automática à meia-noite, 4 missões diárias
+- **Missões de Trilha**: Desbloqueio sequencial (completar p1 → desbloqueia p2)
+- **Badges Automáticos**: 8 badges que desbloqueiam baseado em condições:
+  - ⭐ Primeiro Passo (1ª transação)
+  - 🔥 7 Dias (streak >= 7)
+  - 💰 Poupador (saldo >= 1000)
+  - 📝 Registrador (50 transações)
+  - 🎯 Focado (10 missões completas)
+  - 💎 Mestre (level >= 20)
+  - 📅 Consistente (30 dias conscientes)
+  - 🏆 Economista (3 meses positivos)
+
+**Sistema de Streak Real:**
+- Salva última data de atividade
+- Incrementa streak se houver atividade no dia
+- Reseta streak se pular um dia
+- Registra maior streak alcançado
+
+**Sistema de Ligas:**
+- BRONZE III/II/I → PRATA III/II/I → OURO III/II/I → PLATINA → DIAMANTE → MESTRE
+- Baseado em XP total acumulado
+
+**Dashboard Dinâmico (`components/Dashboard.tsx`):**
+- Cards de resumo: Ganhos do mês, Gastos do mês, Economia/Déficit, Streak
+- Gráfico de barras dos últimos 7 dias (gastos reais)
+- Lista de transações recentes
+- Missões diárias com progresso
+- Barra de XP para próximo nível
+
+**ProgressView Dinâmico (`components/ProgressView.tsx`):**
+- Métricas reais: Saúde Orçamentária, XP Acumulado, Dias Conscientes, Economia Real
+- Gráfico de área (Recharts) com ganhos vs gastos dos últimos 6 meses
+- Saúde dos Hábitos: Consistência, Aderência, Meta de Reserva, Controle de Impulso
+- Top categorias de gastos
+
+**CommunityView Dinâmico (`components/CommunityView.tsx`):**
+- Posts automáticos gerados por ações do usuário (level up, streak, badges)
+- Posts do usuário destacados com tag "VOCÊ"
+- Widget de stats do usuário (ranking, streak)
+- Ranking simulado baseado em XP
+
+**ProfileView Completo (`components/ProfileView.tsx`):**
+- Estatísticas reais: Total transações, Missões completas, Maior streak, Dias conscientes
+- Liga atual com XP total
+- Grid de badges com tooltips (nome + descrição)
+- Toggle de notificações funcional (salva no localStorage)
+- Botão "Resetar Dados" com confirmação (limpa todo localStorage)
+- Data de primeiro acesso ("Membro desde...")
+
+**Arquivos Modificados/Criados:**
+- `lib/types.ts` - Novas interfaces: Transaction, UserProgress, AppSettings + categorias
+- `lib/constants.ts` - DEFAULT_BADGES, DEFAULT_MISSIONS, XP_CONFIG, LEAGUES, getLeague()
+- `lib/data-context.tsx` - NOVO: Contexto completo de dados com persistência
+- `components/Providers.tsx` - Adicionado DataProvider
+- `app/page.tsx` - Integração com useData(), modal expandido
+- `components/Dashboard.tsx` - Dados dinâmicos, gráfico real, transações recentes
+- `components/ProgressView.tsx` - Métricas calculadas, gráficos reais
+- `components/CommunityView.tsx` - Posts dinâmicos, stats do usuário
+- `components/ProfileView.tsx` - Estatísticas, toggle notificações, reset dados
+- `components/MissionsView.tsx` - Integração com contexto, barra de progresso

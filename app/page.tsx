@@ -2,52 +2,67 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { AppTab, User, Mission, CommunityPost } from '@/lib/types'
-import { MOCK_USER, MOCK_MISSIONS, MOCK_COMMUNITY } from '@/lib/constants'
+import { AppTab, EXPENSE_CATEGORIES, INCOME_CATEGORIES, TransactionType } from '@/lib/types'
 import { useAuth, getAvatarUrl } from '@/lib/auth-context'
+import { useData } from '@/lib/data-context'
 import Sidebar from '@/components/Sidebar'
 import Dashboard from '@/components/Dashboard'
 import MissionsView from '@/components/MissionsView'
 import ProgressView from '@/components/ProgressView'
 import CommunityView from '@/components/CommunityView'
 import ProfileView from '@/components/ProfileView'
-import { Search, Bell, Plus, Menu, X, DollarSign, LogOut } from 'lucide-react'
+import { Search, Bell, Plus, Menu, X, DollarSign, LogOut, TrendingUp, TrendingDown, Calendar } from 'lucide-react'
 
 export default function Home() {
-  const { isAuthenticated, isLoading, userProfile, logout } = useAuth()
+  const { isAuthenticated, isLoading: authLoading, userProfile, logout } = useAuth()
+  const {
+    user,
+    missions,
+    communityPosts,
+    addTransaction,
+    completeMission,
+    likePost,
+    updateUser,
+    isLoading: dataLoading
+  } = useData()
   const router = useRouter()
 
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.HOME)
-  const [user, setUser] = useState<User>(MOCK_USER)
-  const [missions, setMissions] = useState<Mission[]>(MOCK_MISSIONS)
-  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [newExpense, setNewExpense] = useState({ description: '', amount: '' })
   const [showUserMenu, setShowUserMenu] = useState(false)
 
-  // Atualizar user com dados do perfil quando disponível
+  // Form state for new transaction
+  const [transactionType, setTransactionType] = useState<TransactionType>('expense')
+  const [transactionForm, setTransactionForm] = useState({
+    description: '',
+    amount: '',
+    category: '',
+    date: new Date().toISOString().split('T')[0],
+  })
+
+  const categories = transactionType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
+
+  // Update user name from profile
   useEffect(() => {
     if (userProfile) {
-      setUser(prev => ({
-        ...prev,
-        name: userProfile.displayName
-      }))
+      updateUser({ name: userProfile.displayName })
     }
-  }, [userProfile])
+  }, [userProfile, updateUser])
 
-  // Verificar autenticação
+  // Check authentication
   useEffect(() => {
-    if (!isLoading) {
+    if (!authLoading) {
       if (!isAuthenticated) {
         router.push('/login')
       } else if (!userProfile?.isProfileSetup) {
         router.push('/setup')
       }
     }
-  }, [isLoading, isAuthenticated, userProfile, router])
+  }, [authLoading, isAuthenticated, userProfile, router])
 
-  // Loading state
+  const isLoading = authLoading || dataLoading
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
@@ -59,7 +74,6 @@ export default function Home() {
     )
   }
 
-  // Aguardar redirecionamento
   if (!isAuthenticated || !userProfile?.isProfileSetup) {
     return null
   }
@@ -75,42 +89,30 @@ export default function Home() {
     }
   }
 
-  const handleAddXP = (amount: number) => {
-    setUser(prev => {
-      let newXP = prev.xp + amount
-      let newLevel = prev.level
-      if (newXP >= prev.xpToNextLevel) {
-        newXP -= prev.xpToNextLevel
-        newLevel += 1
-      }
-      return { ...prev, xp: newXP, level: newLevel }
-    })
-  }
-
-  const handleCompleteMission = (id: string) => {
-    const mission = missions.find(m => m.id === id)
-    if (mission && mission.status === 'available') {
-      setMissions(prev => prev.map(m => m.id === id ? { ...m, status: 'completed' as const } : m))
-      handleAddXP(mission.xp)
-    }
-  }
-
-  const handleLikePost = (id: string) => {
-    setCommunityPosts(prev => prev.map(p => p.id === id ? { ...p, likes: p.likes + 1 } : p))
-  }
-
-  const handleAddExpense = (e: React.FormEvent) => {
+  const handleAddTransaction = (e: React.FormEvent) => {
     e.preventDefault()
-    const amountNum = parseFloat(newExpense.amount)
-    if (!isNaN(amountNum)) {
-      setUser(prev => ({ ...prev, balance: prev.balance - amountNum }))
-      handleAddXP(20)
-      setIsModalOpen(false)
-      setNewExpense({ description: '', amount: '' })
+    const amount = parseFloat(transactionForm.amount)
 
-      const regMission = missions.find(m => m.title === 'Registrar gasto')
-      if (regMission) handleCompleteMission(regMission.id)
-    }
+    if (isNaN(amount) || amount <= 0) return
+    if (!transactionForm.category) return
+
+    addTransaction({
+      type: transactionType,
+      amount,
+      description: transactionForm.description,
+      category: transactionForm.category,
+      date: transactionForm.date,
+    })
+
+    // Reset form
+    setIsModalOpen(false)
+    setTransactionForm({
+      description: '',
+      amount: '',
+      category: '',
+      date: new Date().toISOString().split('T')[0],
+    })
+    setTransactionType('expense')
   }
 
   const handleLogout = () => {
@@ -120,12 +122,24 @@ export default function Home() {
 
   const renderView = () => {
     switch (activeTab) {
-      case AppTab.HOME: return <Dashboard user={user} missions={missions} onCompleteMission={handleCompleteMission} />
-      case AppTab.MISSIONS: return <MissionsView missions={missions} onCompleteMission={handleCompleteMission} />
-      case AppTab.PROGRESS: return <ProgressView />
-      case AppTab.COMMUNITY: return <CommunityView posts={communityPosts} onLike={handleLikePost} />
-      case AppTab.PROFILE: return <ProfileView user={user} avatarUrl={userProfile ? getAvatarUrl(userProfile.avatarId) : undefined} username={userProfile?.username} />
-      default: return <Dashboard user={user} missions={missions} onCompleteMission={handleCompleteMission} />
+      case AppTab.HOME:
+        return <Dashboard user={user} missions={missions} onCompleteMission={completeMission} />
+      case AppTab.MISSIONS:
+        return <MissionsView missions={missions} onCompleteMission={completeMission} />
+      case AppTab.PROGRESS:
+        return <ProgressView />
+      case AppTab.COMMUNITY:
+        return <CommunityView posts={communityPosts} onLike={likePost} />
+      case AppTab.PROFILE:
+        return (
+          <ProfileView
+            user={user}
+            avatarUrl={userProfile ? getAvatarUrl(userProfile.avatarId) : undefined}
+            username={userProfile?.username}
+          />
+        )
+      default:
+        return <Dashboard user={user} missions={missions} onCompleteMission={completeMission} />
     }
   }
 
@@ -242,48 +256,149 @@ export default function Home() {
         </main>
       </div>
 
-      {/* Modal Novo Registro */}
+      {/* Modal Novo Registro Expandido */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#0F172A]/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-white rounded-[32px] p-8 w-full max-w-md relative zoom-in-95">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-600">
+          <div className="bg-white rounded-[32px] p-6 sm:p-8 w-full max-w-md relative animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-4 sm:top-6 right-4 sm:right-6 text-gray-400 hover:text-gray-600 transition-colors">
               <X size={20} />
             </button>
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-[#1F7A8C]/10 text-[#1F7A8C] rounded-2xl flex items-center justify-center">
-                <DollarSign size={24} />
+
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${transactionType === 'expense'
+                  ? 'bg-[#E63946]/10 text-[#E63946]'
+                  : 'bg-[#4CAF50]/10 text-[#4CAF50]'
+                }`}>
+                {transactionType === 'expense' ? <TrendingDown size={24} /> : <TrendingUp size={24} />}
               </div>
-              <h3 className="text-xl font-bold">Novo Gasto</h3>
+              <div>
+                <h3 className="text-xl font-bold">Nova Transacao</h3>
+                <p className="text-xs text-gray-400">Registre seu {transactionType === 'expense' ? 'gasto' : 'ganho'}</p>
+              </div>
             </div>
-            <form onSubmit={handleAddExpense} className="space-y-6">
+
+            {/* Type Toggle */}
+            <div className="flex gap-2 mb-6 p-1 bg-gray-100 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setTransactionType('expense')
+                  setTransactionForm(prev => ({ ...prev, category: '' }))
+                }}
+                className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${transactionType === 'expense'
+                    ? 'bg-white text-[#E63946] shadow-sm'
+                    : 'text-gray-400 hover:text-gray-600'
+                  }`}
+              >
+                <TrendingDown size={18} />
+                Gasto
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTransactionType('income')
+                  setTransactionForm(prev => ({ ...prev, category: '' }))
+                }}
+                className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${transactionType === 'income'
+                    ? 'bg-white text-[#4CAF50] shadow-sm'
+                    : 'text-gray-400 hover:text-gray-600'
+                  }`}
+              >
+                <TrendingUp size={18} />
+                Ganho
+              </button>
+            </div>
+
+            <form onSubmit={handleAddTransaction} className="space-y-5">
+              {/* Amount */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase">Descrição</label>
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Valor (R$)</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    required
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={transactionForm.amount}
+                    onChange={e => setTransactionForm(prev => ({ ...prev, amount: e.target.value }))}
+                    placeholder="0,00"
+                    className="w-full bg-gray-50 border-none rounded-xl pl-12 pr-4 py-4 text-xl font-bold focus:ring-2 focus:ring-[#1F7A8C]/20 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Descricao</label>
                 <input
                   required
                   type="text"
-                  value={newExpense.description}
-                  onChange={e => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Ex: Almoço"
+                  value={transactionForm.description}
+                  onChange={e => setTransactionForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder={transactionType === 'expense' ? 'Ex: Almoco no restaurante' : 'Ex: Salario do mes'}
                   className="w-full bg-gray-50 border-none rounded-xl p-4 text-sm focus:ring-2 focus:ring-[#1F7A8C]/20 outline-none"
                 />
               </div>
+
+              {/* Category */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase">Valor (R$)</label>
-                <input
-                  required
-                  type="number"
-                  step="0.01"
-                  value={newExpense.amount}
-                  onChange={e => setNewExpense(prev => ({ ...prev, amount: e.target.value }))}
-                  placeholder="0,00"
-                  className="w-full bg-gray-50 border-none rounded-xl p-4 text-lg font-bold focus:ring-2 focus:ring-[#1F7A8C]/20 outline-none"
-                />
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Categoria</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {categories.map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setTransactionForm(prev => ({ ...prev, category: cat.id }))}
+                      className={`p-3 rounded-xl flex flex-col items-center gap-1 transition-all ${transactionForm.category === cat.id
+                          ? transactionType === 'expense'
+                            ? 'bg-[#E63946]/10 ring-2 ring-[#E63946]/30'
+                            : 'bg-[#4CAF50]/10 ring-2 ring-[#4CAF50]/30'
+                          : 'bg-gray-50 hover:bg-gray-100'
+                        }`}
+                    >
+                      <span className="text-xl">{cat.icon}</span>
+                      <span className="text-[10px] font-bold text-gray-600 truncate w-full text-center">{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <button type="submit" className="w-full bg-[#1F7A8C] text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-[#186170] transition-all">
-                Salvar Registro
+
+              {/* Date */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Data</label>
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    required
+                    type="date"
+                    value={transactionForm.date}
+                    onChange={e => setTransactionForm(prev => ({ ...prev, date: e.target.value }))}
+                    className="w-full bg-gray-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm focus:ring-2 focus:ring-[#1F7A8C]/20 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={!transactionForm.category}
+                className={`w-full py-4 rounded-2xl font-bold shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${transactionType === 'expense'
+                    ? 'bg-[#E63946] text-white hover:bg-[#c92f3a]'
+                    : 'bg-[#4CAF50] text-white hover:bg-[#43a047]'
+                  }`}
+              >
+                Salvar {transactionType === 'expense' ? 'Gasto' : 'Ganho'}
               </button>
             </form>
+
+            {/* XP Badge */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+              <span className="bg-[#1F7A8C]/10 text-[#1F7A8C] px-2 py-1 rounded-lg font-bold">+20 XP</span>
+              <span>por registrar transacao</span>
+            </div>
           </div>
         </div>
       )}
